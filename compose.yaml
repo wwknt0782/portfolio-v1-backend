@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:17
+    container_name: portfolio-v1-backend
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: portfolio-v1-backend
