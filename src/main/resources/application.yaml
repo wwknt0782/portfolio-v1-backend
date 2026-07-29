@@ -12,7 +12,7 @@ spring:
     time-zone: Asia/Tokyo
     serialization:
       indent-output: true
-  # DB設定
+  # DBの設定
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/portfolio-v1-backend}
     username: ${SPRING_DATASOURCE_USERNAME:user}
