@@ -5,12 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -18,17 +16,20 @@ public class CorsConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-            @Value("${app.cors.allowed-origins}") String allowedOrigins
+            @Value("${app.frontend-url}") String frontendUrl
     ) {
         CorsConfiguration configuration = new CorsConfiguration();
+        List<String> allowedOrigins = List.of(frontendUrl, "http://localhost:3000");
 
         // 許可するフロントエンドURLを設定
-        configuration.setAllowedOrigins(parseAllowedOrigins(allowedOrigins));
+        configuration.setAllowedOrigins(allowedOrigins);
         // 許可するHTTPメソッドを設定
         configuration.setAllowedMethods(List.of(
                 HttpMethod.GET.name(),
                 HttpMethod.POST.name(),
+                HttpMethod.PUT.name(),
                 HttpMethod.PATCH.name(),
+                HttpMethod.DELETE.name(),
                 HttpMethod.OPTIONS.name()
         ));
         // 許可するHTTPヘッダーを設定
@@ -37,8 +38,10 @@ public class CorsConfig {
                 HttpHeaders.CONTENT_TYPE,
                 HttpHeaders.ACCEPT
         ));
+        // フロントエンド側にLocationの読み取りを許可する
         configuration.setExposedHeaders(List.of(HttpHeaders.LOCATION));
-        configuration.setAllowCredentials(false);
+        // Cookieの送受信を許可する
+        configuration.setAllowCredentials(true);
         // プリフライト結果を1時間ブラウザにキャッシュさせる
         configuration.setMaxAge(3600L);
 
@@ -47,12 +50,5 @@ public class CorsConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
-    }
-
-    private List<String> parseAllowedOrigins(String allowedOrigins) {
-        return Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(StringUtils::hasText)
-                .toList();
     }
 }
