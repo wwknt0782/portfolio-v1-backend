@@ -3,3 +3,9 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+app:
+  jwt-secret: ${APP_JWT_SECRET}
+  auth:
+    cookie-secure: ${APP_AUTH_COOKIE_SECURE:true}
+    cookie-same-site: ${APP_AUTH_COOKIE_SAME_SITE:None}
