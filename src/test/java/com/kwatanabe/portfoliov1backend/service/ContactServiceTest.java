@@ -1,6 +1,6 @@
 package com.kwatanabe.portfoliov1backend.service;
 
-import com.kwatanabe.portfoliov1backend.dto.ContactRequestDto;
+import com.kwatanabe.portfoliov1backend.dto.ContactRequest;
 import com.kwatanabe.portfoliov1backend.entity.Contact;
 import com.kwatanabe.portfoliov1backend.entity.MailStatus;
 import com.kwatanabe.portfoliov1backend.repository.ContactRepository;
@@ -37,7 +37,7 @@ class ContactServiceTest {
 
     @Test
     void createSetsMailStatusSentWhenNotificationSucceeds() {
-        ContactRequestDto requestDto = new ContactRequestDto(
+        ContactRequest requestDto = new ContactRequest(
                 "山田太郎",
                 "Example Inc.",
                 "taro@example.com",
@@ -64,7 +64,7 @@ class ContactServiceTest {
                 .when(mailService)
                 .sendContactNotification(any(Contact.class));
 
-        ContactRequestDto requestDto = new ContactRequestDto(
+        ContactRequest requestDto = new ContactRequest(
                 "山田太郎",
                 "",
                 "taro@example.com",

@@ -1,6 +1,6 @@
 package com.kwatanabe.portfoliov1backend.controller;
 
-import com.kwatanabe.portfoliov1backend.dto.ErrorResponseDto;
+import com.kwatanabe.portfoliov1backend.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
     // @NotBlank，@Email，@Size等で例外が発生したときに呼ばれる例外処理
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
         Map<String, String> errors = new LinkedHashMap<>();
 
         e.getBindingResult().getFieldErrors().forEach(error ->
@@ -28,25 +28,25 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.badRequest().body(
-                new ErrorResponseDto("入力内容を確認してください", errors)
+                new ErrorResponse("入力内容を確認してください", errors)
         );
     }
 
     // @HTTPリクエストの形式が不正な場合に呼ばれる例外処理
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException() {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException() {
         return ResponseEntity.badRequest().body(
-                new ErrorResponseDto("リクエストボディの形式が正しくありません", Map.of())
+                new ErrorResponse("リクエストボディの形式が正しくありません", Map.of())
         );
     }
 
     // 想定外のエラーが発生したときに呼ばれる例外処理
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
         logger.error("Unexpected error occurred", e);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                new ErrorResponseDto("サーバーエラーが発生しました", Map.of())
+                new ErrorResponse("サーバーエラーが発生しました", Map.of())
         );
     }
 }

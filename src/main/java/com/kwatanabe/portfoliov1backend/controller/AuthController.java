@@ -1,65 +1,91 @@
 package com.kwatanabe.portfoliov1backend.controller;
 
-import com.kwatanabe.portfoliov1backend.dto.AuthMeResponseDto;
-import com.kwatanabe.portfoliov1backend.service.JwtService;
+import com.kwatanabe.portfoliov1backend.dto.LoginRequest;
+import com.kwatanabe.portfoliov1backend.dto.LoginResponse;
+import com.kwatanabe.portfoliov1backend.dto.UserResponse;
+import com.kwatanabe.portfoliov1backend.entity.User;
+import com.kwatanabe.portfoliov1backend.repository.UserRepository;
+import com.kwatanabe.portfoliov1backend.service.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.time.Duration;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-public class AuthController {
-
-    private final JwtService jwtService;
-    private final String frontendUrl;
+public class AuthController{
+    private final AuthService authService;
+    private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final String cookieName;
-    private final boolean cookieSecure;
-    private final String cookieSameSite;
     private final Duration tokenLifetime;
 
     public AuthController(
-            JwtService jwtService,
-            @Value("${app.frontend-url}") String frontendUrl,
-            @Value("${app.auth.cookie-name:PORTFOLIO_AUTH}") String cookieName,
-            @Value("${app.auth.cookie-secure:false}") boolean cookieSecure,
-            @Value("${app.auth.cookie-same-site:Lax}") String cookieSameSite,
-            @Value("${app.auth.token-lifetime:PT8H}") Duration tokenLifetime
-    ) {
-        this.jwtService = jwtService;
-        this.frontendUrl = frontendUrl;
+            AuthService authService,
+            UserRepository userRepository,
+            @Value("${app.auth.cookie-name}")String cookieName,
+            @Value("${app.auth.token-lifetime}")Duration tokenLifetime){
+        this.authService = authService;
+        this.userRepository = userRepository;
         this.cookieName = cookieName;
-        this.cookieSecure = cookieSecure;
-        this.cookieSameSite = cookieSameSite;
         this.tokenLifetime = tokenLifetime;
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<Void> login(Authentication authentication) {
-        String token = jwtService.issueToken(authentication.getName());
-        ResponseCookie cookie = ResponseCookie.from(cookieName, token)
+    // ユーザー名とパスワードを受け取る
+    // サービス層で認証→OKならJWT組み立て
+    // JWT付きレスポンスを返す
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
+        // リクエストのユーザー名とパスワードをDBで照合する
+        // AuthService.login(); ユーザー名とパスワードを受け取って認証したらJWTを返す
+        log.info(request.getUserName()+"/"+request.getPassword());
+
+        String jwt;
+        try{
+            jwt = authService.login(request.getUserName(), request.getPassword());
+        } catch (Error error) {
+            return new ResponseEntity<>(new LoginResponse("ユーザー名またはパスワードが正しくありません"), HttpStatus.UNAUTHORIZED);
+        }
+        // JWTをCookieに設定する
+        ResponseCookie cookie = ResponseCookie.from(cookieName, jwt)
                 .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite(cookieSameSite)
+                .secure(false) // todo 本番環境ではtrue
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(tokenLifetime)
                 .build();
 
-        return ResponseEntity.status(302)
+        // JWT付きレスポンスを返す
+        LoginResponse response = new LoginResponse("ログインに成功しました");
+        return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .location(URI.create(frontendUrl))
-                .build();
+                .body(response);
     }
 
     @GetMapping("/me")
-    public AuthMeResponseDto me(Authentication authentication) {
-        return new AuthMeResponseDto(true, authentication.getName());
+    public ResponseEntity<UserResponse> me(Authentication authentication){
+        String username = authentication.getName();
+        Optional<User> optionalUser = userRepository.findByName(username);
+
+        if(optionalUser.isEmpty()) {
+            return new ResponseEntity<>(new UserResponse("9999",username , "ログインしていません"), HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = optionalUser.get();
+        String id = user.getId().toString();
+
+        UserResponse response = new UserResponse(id, username, "ログインしています");
+        return ResponseEntity.ok(response);
     }
+
+
+
 }
