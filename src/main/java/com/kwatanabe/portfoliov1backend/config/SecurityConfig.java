@@ -29,10 +29,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 // サーバーセッションを利用しない
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 全てのリクエストに対して認証を必須にする
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                // Basic認証を有効にする
-                .httpBasic(Customizer.withDefaults());
+                // 全てのリクエストを許可する
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
         return http.build();
     }
@@ -64,8 +62,10 @@ public class SecurityConfig {
                                 "/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated())
-                // Basic認証より前にJWTフィルターによる認証チェックを実施する
-                .addFilterBefore(jwtCookieAuthenticationFilter, BasicAuthenticationFilter.class);
+                .addFilterBefore(
+                        jwtCookieAuthenticationFilter,
+                        BasicAuthenticationFilter.class
+                );
 
         return http.build();
     }

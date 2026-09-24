@@ -1,6 +1,6 @@
 package com.kwatanabe.portfoliov1backend.service;
 
-import com.kwatanabe.portfoliov1backend.dto.ContactRequestDto;
+import com.kwatanabe.portfoliov1backend.dto.ContactRequest;
 import com.kwatanabe.portfoliov1backend.entity.Contact;
 import com.kwatanabe.portfoliov1backend.entity.MailStatus;
 import com.kwatanabe.portfoliov1backend.repository.ContactRepository;
@@ -15,8 +15,8 @@ public class ContactService {
     private final ContactRepository contactRepository;
     private final MailService mailService;
 
-    public void create(ContactRequestDto contactRequestDto) {
-        Contact contact = createContact(contactRequestDto);
+    public void create(ContactRequest contactRequest) {
+        Contact contact = createContact(contactRequest);
         Contact savedContact = contactRepository.save(contact);
 
         updateMailStatus(savedContact);
@@ -24,13 +24,13 @@ public class ContactService {
         contactRepository.save(savedContact);
     }
 
-    private Contact createContact(ContactRequestDto contactRequestDto) {
+    private Contact createContact(ContactRequest contactRequest) {
         Contact contact = new Contact();
 
-        contact.setName(contactRequestDto.getName());
-        contact.setCompanyName(contactRequestDto.getCompanyName());
-        contact.setEmail(contactRequestDto.getEmail());
-        contact.setMessage(contactRequestDto.getMessage());
+        contact.setName(contactRequest.getName());
+        contact.setCompanyName(contactRequest.getCompanyName());
+        contact.setEmail(contactRequest.getEmail());
+        contact.setMessage(contactRequest.getMessage());
         contact.setCreatedAt(LocalDateTime.now());
 
         return contact;

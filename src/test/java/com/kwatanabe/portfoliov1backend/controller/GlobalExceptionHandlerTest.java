@@ -1,7 +1,7 @@
 package com.kwatanabe.portfoliov1backend.controller;
 
-import com.kwatanabe.portfoliov1backend.dto.ContactRequestDto;
-import com.kwatanabe.portfoliov1backend.dto.ErrorResponseDto;
+import com.kwatanabe.portfoliov1backend.dto.ContactRequest;
+import com.kwatanabe.portfoliov1backend.dto.ErrorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -21,14 +21,14 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleValidationExceptionReturnsFieldErrors() throws NoSuchMethodException {
-        ContactRequestDto requestDto = new ContactRequestDto();
+        ContactRequest requestDto = new ContactRequest();
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(requestDto, "contactRequestDto");
         bindingResult.addError(new FieldError("contactRequestDto", "email", "メールアドレスの形式が正しくありません"));
-        Method method = GlobalExceptionHandlerTest.class.getDeclaredMethod("dummyEndpoint", ContactRequestDto.class);
+        Method method = GlobalExceptionHandlerTest.class.getDeclaredMethod("dummyEndpoint", ContactRequest.class);
         MethodParameter methodParameter = new MethodParameter(method, 0);
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
-        ResponseEntity<ErrorResponseDto> response = globalExceptionHandler.handleValidationException(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleValidationException(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode().value());
         assertNotNull(response.getBody());
@@ -38,7 +38,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleHttpMessageNotReadableExceptionReturnsEmptyErrors() {
-        ResponseEntity<ErrorResponseDto> response =
+        ResponseEntity<ErrorResponse> response =
                 globalExceptionHandler.handleHttpMessageNotReadableException();
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatusCode().value());
@@ -49,7 +49,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     void handleExceptionReturnsGenericMessage() {
-        ResponseEntity<ErrorResponseDto> response =
+        ResponseEntity<ErrorResponse> response =
                 globalExceptionHandler.handleException(new RuntimeException("internal detail"));
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatusCode().value());
@@ -59,6 +59,6 @@ class GlobalExceptionHandlerTest {
     }
 
     @SuppressWarnings("unused")
-    private void dummyEndpoint(ContactRequestDto requestDto) {
+    private void dummyEndpoint(ContactRequest requestDto) {
     }
 }

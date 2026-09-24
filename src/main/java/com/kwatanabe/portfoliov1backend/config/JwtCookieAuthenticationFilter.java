@@ -57,11 +57,14 @@ public class JwtCookieAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        System.out.println("JwtCookieAuthenticationFilter: " + request.getRequestURI());
         String token = findCookie(request);
+        System.out.println("token = " + token);
         if (token != null) {
             try {
                 // リクエストごとに署名と有効期限を検証する
                 String username = jwtService.verifyToken(token);
+                System.out.println("JWT verified: " + username);
                 // 認証済みとして登録する
                 var authentication = UsernamePasswordAuthenticationToken.authenticated(
                         username,
@@ -69,6 +72,8 @@ public class JwtCookieAuthenticationFilter extends OncePerRequestFilter {
                         List.of()
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("Authentication = "
+                        + SecurityContextHolder.getContext().getAuthentication());
 
                 // SameSite=None の cookie を使うため、更新系 API は許可済み Origin に限定して CSRF を防ぐ。
                 if (isUnsafeMethod(request) && !allowedOrigins.contains(request.getHeader("Origin"))) {

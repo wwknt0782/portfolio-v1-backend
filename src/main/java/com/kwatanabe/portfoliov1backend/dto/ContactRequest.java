@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContactRequestDto {
+public class ContactRequest {
 
     @NotBlank
     @Size(max = 100)

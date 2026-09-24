@@ -8,11 +8,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table
+@Table(name="contacts")
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class Contact {
 
     // ID 自動採番

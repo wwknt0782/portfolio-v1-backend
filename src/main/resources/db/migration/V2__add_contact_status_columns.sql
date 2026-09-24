@@ -1,4 +1,4 @@
-ALTER TABLE contact
+ALTER TABLE contacts
     ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'RECEIVED',
     ADD COLUMN mail_status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     ADD COLUMN mail_error_message TEXT,
