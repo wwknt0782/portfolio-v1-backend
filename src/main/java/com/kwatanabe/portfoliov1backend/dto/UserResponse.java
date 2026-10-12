@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserResponse {
-    public String id;
-    public String name;
-    public String message;
+    private String id;
+    private String userName;
+    private String[] roles;
 }

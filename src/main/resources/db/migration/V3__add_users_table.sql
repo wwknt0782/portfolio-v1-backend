@@ -5,4 +5,4 @@ CREATE TABLE users
     password_hash VARCHAR(100) NOT NULL
 );
 
-INSERT INTO users (name, password_hash) VALUES ('山田太郎', '$2a$10$UURWyjfHiXkCouDOVMSxFudWwbDnpmimBLJ3twEi13AT6BJRkkUum');
+INSERT INTO users (name, password_hash) VALUES ('user', '$2a$10$UURWyjfHiXkCouDOVMSxFudWwbDnpmimBLJ3twEi13AT6BJRkkUum');

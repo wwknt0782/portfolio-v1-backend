@@ -75,7 +75,7 @@ app:
     cookie-name: ${APP_AUTH_COOKIE_NAME:PORTFOLIO_AUTH}
     token-lifetime: ${APP_AUTH_TOKEN_LIFETIME:PT8H}
     cookie-secure: ${APP_AUTH_COOKIE_SECURE:false}
-    cookie-same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
+    cookie-same-site: ${APP_AUTH_COOKIE_SAME_SITE:Strict}
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   mail:

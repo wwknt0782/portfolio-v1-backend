@@ -1,11 +1,13 @@
 package com.kwatanabe.portfoliov1backend.controller;
 
+import com.kwatanabe.portfoliov1backend.dto.AuthStatusResponse;
 import com.kwatanabe.portfoliov1backend.dto.LoginRequest;
 import com.kwatanabe.portfoliov1backend.dto.LoginResponse;
 import com.kwatanabe.portfoliov1backend.dto.UserResponse;
 import com.kwatanabe.portfoliov1backend.entity.User;
 import com.kwatanabe.portfoliov1backend.repository.UserRepository;
 import com.kwatanabe.portfoliov1backend.service.AuthService;
+import com.kwatanabe.portfoliov1backend.service.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,26 +29,31 @@ public class AuthController{
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final String cookieName;
     private final Duration tokenLifetime;
+    private final Boolean cookieSecure;
+    private final String cookieSameSite;
 
     public AuthController(
             AuthService authService,
             UserRepository userRepository,
             @Value("${app.auth.cookie-name}")String cookieName,
-            @Value("${app.auth.token-lifetime}")Duration tokenLifetime){
+            @Value("${app.auth.token-lifetime}")Duration tokenLifetime,
+            @Value("${app.auth.cookie-secure}")Boolean cookieSecure,
+            @Value("${app.auth.cookie-same-site}")String cookieSameSite){
         this.authService = authService;
         this.userRepository = userRepository;
         this.cookieName = cookieName;
         this.tokenLifetime = tokenLifetime;
+        this.cookieSecure = cookieSecure;
+        this.cookieSameSite = cookieSameSite;
     }
 
     // ユーザー名とパスワードを受け取る
     // サービス層で認証→OKならJWT組み立て
     // JWT付きレスポンスを返す
-    @PostMapping("/login")
+    @PostMapping("/admin/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         // リクエストのユーザー名とパスワードをDBで照合する
         // AuthService.login(); ユーザー名とパスワードを受け取って認証したらJWTを返す
-        log.info(request.getUserName()+"/"+request.getPassword());
 
         String jwt;
         try{
@@ -57,8 +64,8 @@ public class AuthController{
         // JWTをCookieに設定する
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwt)
                 .httpOnly(true)
-                .secure(false) // todo 本番環境ではtrue
-                .sameSite("Strict")
+                .secure(cookieSecure) // todo 本番環境ではtrue
+                .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(tokenLifetime)
                 .build();
@@ -70,22 +77,45 @@ public class AuthController{
                 .body(response);
     }
 
-    @GetMapping("/me")
+    @GetMapping("/admin/status")
+    public ResponseEntity<AuthStatusResponse> getAuthStatus(
+            Authentication authentication
+    ) {
+return ResponseEntity.ok(
+        authService.getAuthStatus(authentication)
+);
+    }
+
+    @GetMapping("/admin/me")
     public ResponseEntity<UserResponse> me(Authentication authentication){
         String username = authentication.getName();
         Optional<User> optionalUser = userRepository.findByName(username);
 
         if(optionalUser.isEmpty()) {
-            return new ResponseEntity<>(new UserResponse("9999",username , "ログインしていません"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new UserResponse("9999","username" ,new String[]{""}), HttpStatus.UNAUTHORIZED);
         }
 
         User user = optionalUser.get();
         String id = user.getId().toString();
+        String userName = user.getName();
 
-        UserResponse response = new UserResponse(id, username, "ログインしています");
+        UserResponse response = new UserResponse(id, userName,new String[]{""});
         return ResponseEntity.ok(response);
     }
 
+@PostMapping("/logout")
+    public ResponseEntity<Void> logout(){
+ResponseCookie cookie = ResponseCookie.from(cookieName, "")
+        .httpOnly(true)
+        .secure(false) // todo 本番環境ではtrue
+        .sameSite("Strict")
+        .path("/")
+        .maxAge(Duration.ZERO)
+        .build();
 
+return ResponseEntity.noContent()
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .build();
+    }
 
 }

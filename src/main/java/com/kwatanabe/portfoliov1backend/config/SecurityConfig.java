@@ -22,7 +22,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain loginSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/auth/login")
+                .securityMatcher("/auth/admin/login")
                 // CorsConfigのCORS設定を利用する
                 .cors(Customizer.withDefaults())
                 // CSRFを無効にする
@@ -55,6 +55,10 @@ public class SecurityConfig {
                 // OPTIONSリクエストはすべて通し，それ以外は認証必須にする
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // 認証状態確認リクエストは許可する
+                        .requestMatchers(HttpMethod.GET, "/auth/admin/status").permitAll()
+                        // ログアウトリクエストは許可する
+                        .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
                         // ローカル開発でSwagger UIとOpenAPI定義を参照できるようにする
                         .requestMatchers(
                                 "/swagger-ui.html",

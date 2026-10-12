@@ -1,8 +1,12 @@
 package com.kwatanabe.portfoliov1backend.service;
 
+import com.kwatanabe.portfoliov1backend.dto.AuthStatusResponse;
 import com.kwatanabe.portfoliov1backend.entity.User;
+import com.kwatanabe.portfoliov1backend.enums.AuthStatus;
 import com.kwatanabe.portfoliov1backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -42,9 +46,20 @@ public class AuthService {
         return jwtService.issueToken(userName);
     }
 
+    // 認証状態を返す
+    public AuthStatusResponse getAuthStatus(Authentication authentication){
+        if(authentication != null && authentication.isAuthenticated())
+        {
+            return new AuthStatusResponse(true,AuthStatus.AUTHENTICATED
+            );
+        }
+        return new AuthStatusResponse(false, AuthStatus.NOT_AUTHENTICATED);
+    }
+
     private String generatePasswordHash(String password){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         return encoder.encode(password);
     }
+
 }
