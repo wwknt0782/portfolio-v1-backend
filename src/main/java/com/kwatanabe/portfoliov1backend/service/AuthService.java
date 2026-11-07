@@ -55,11 +55,4 @@ public class AuthService {
         }
         return new AuthStatusResponse(false, AuthStatus.NOT_AUTHENTICATED);
     }
-
-    private String generatePasswordHash(String password){
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
-        return encoder.encode(password);
-    }
-
 }
