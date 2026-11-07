@@ -45,7 +45,7 @@ public class JwtCookieAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return HttpMethod.OPTIONS.matches(request.getMethod())
-                || "/auth/admin/login".equals(path)
+                || "/auth/login".equals(path)
                 || "/swagger-ui.html".equals(path)
                 || path.startsWith("/swagger-ui/")
                 || path.startsWith("/api-docs");
