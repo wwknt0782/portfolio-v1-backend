@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // ログイン用Basic認証
+    // ログイン用APIは常時許可
     @Bean
     @Order(1)
     public SecurityFilterChain loginSecurityFilterChain(HttpSecurity http) throws Exception {
@@ -35,7 +35,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ログイン以外のAPIに適用する認証設定
+    // ログイン以外のAPIにはJWT認証を要求する
     @Bean
     @Order(2)
     public SecurityFilterChain apiSecurityFilterChain(

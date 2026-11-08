@@ -64,7 +64,7 @@ public class AuthController{
         // JWTをCookieに設定する
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwt)
                 .httpOnly(true)
-                .secure(cookieSecure) // todo 本番環境ではtrue
+                .secure(cookieSecure) // 本番環境ではtrueでhttpsのみ許可
                 .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(tokenLifetime)
@@ -107,8 +107,8 @@ return ResponseEntity.ok(
     public ResponseEntity<Void> logout(){
 ResponseCookie cookie = ResponseCookie.from(cookieName, "")
         .httpOnly(true)
-        .secure(false) // todo 本番環境ではtrue
-        .sameSite("Strict")
+        .secure(cookieSecure) // 本番環境ではtrueでhttpsのみ許可
+        .sameSite(cookieSameSite)
         .path("/")
         .maxAge(Duration.ZERO)
         .build();

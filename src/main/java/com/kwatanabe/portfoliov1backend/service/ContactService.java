@@ -5,6 +5,7 @@ import com.kwatanabe.portfoliov1backend.entity.Contact;
 import com.kwatanabe.portfoliov1backend.entity.MailStatus;
 import com.kwatanabe.portfoliov1backend.repository.ContactRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,9 @@ public class ContactService {
         } catch (Exception e) {
             contact.setMailStatus(MailStatus.FAILED);
             contact.setMailErrorMessage(getErrorMessage(e));
+
+            contactRepository.save(contact);
+            throw new MailSendException("メールの送信に失敗しました", e);
         }
     }
 
