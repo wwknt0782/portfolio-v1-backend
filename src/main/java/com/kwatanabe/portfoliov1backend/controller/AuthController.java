@@ -50,7 +50,7 @@ public class AuthController{
     // ユーザー名とパスワードを受け取る
     // サービス層で認証→OKならJWT組み立て
     // JWT付きレスポンスを返す
-    @PostMapping("/admin/login")
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         // リクエストのユーザー名とパスワードをDBで照合する
         // AuthService.login(); ユーザー名とパスワードを受け取って認証したらJWTを返す
@@ -64,7 +64,7 @@ public class AuthController{
         // JWTをCookieに設定する
         ResponseCookie cookie = ResponseCookie.from(cookieName, jwt)
                 .httpOnly(true)
-                .secure(cookieSecure) // todo 本番環境ではtrue
+                .secure(cookieSecure) // 本番環境ではtrueでhttpsのみ許可
                 .sameSite(cookieSameSite)
                 .path("/")
                 .maxAge(tokenLifetime)
@@ -77,7 +77,7 @@ public class AuthController{
                 .body(response);
     }
 
-    @GetMapping("/admin/status")
+    @GetMapping("/status")
     public ResponseEntity<AuthStatusResponse> getAuthStatus(
             Authentication authentication
     ) {
@@ -86,7 +86,7 @@ return ResponseEntity.ok(
 );
     }
 
-    @GetMapping("/admin/me")
+    @GetMapping("/me")
     public ResponseEntity<UserResponse> me(Authentication authentication){
         String username = authentication.getName();
         Optional<User> optionalUser = userRepository.findByName(username);
@@ -107,8 +107,8 @@ return ResponseEntity.ok(
     public ResponseEntity<Void> logout(){
 ResponseCookie cookie = ResponseCookie.from(cookieName, "")
         .httpOnly(true)
-        .secure(false) // todo 本番環境ではtrue
-        .sameSite("Strict")
+        .secure(cookieSecure) // 本番環境ではtrueでhttpsのみ許可
+        .sameSite(cookieSameSite)
         .path("/")
         .maxAge(Duration.ZERO)
         .build();
